@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
+const cors = require("cors");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const paypal = require("paypal-rest-sdk");
@@ -23,6 +24,7 @@ const productRoute = require("./api/routes/products");
 const orderRoute = require("./api/routes/orders");
 const userRoute = require("./api/routes/user");
 
+app.use(cors());
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
