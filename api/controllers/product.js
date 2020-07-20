@@ -123,6 +123,16 @@ exports.deleteProduct = async (req, res, next) => {
         msg: "Deleted",
         product: deleted,
       });
+      const user = await User.findById(req.userId);
+      if (user) {
+        if (user.cart && user.cart.length) {
+          const cIndex = user.cart.findIndex((c) => c._id === delId);
+          if (cIndex !== -1) {
+            user.cart.splice(cIndex, 1);
+            user.save();
+          }
+        }
+      }
     }
   } catch (err) {
     console.log(err);
