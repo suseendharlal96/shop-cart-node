@@ -32,7 +32,8 @@ app.use(bodyParser.json());
 
 mongoose
   .connect(
-    "mongodb+srv://suseendhar:susee123@cluster0-iwva7.mongodb.net/shoppingcart?retryWrites=true&w=majority"
+    "mongodb+srv://suseendhar:susee123@cluster0-iwva7.mongodb.net/shoppingcart?retryWrites=true&w=majority",
+    { useUnifiedTopology: true, useNewUrlParser: true }
   )
   .then((res) => {
     console.log("connected");
