@@ -2,13 +2,37 @@ const Product = require("../models/product");
 const User = require("../models/user");
 
 exports.getAllProducts = async (req, res, next) => {
+  const page = +req.query.page;
+  const limit = +req.query.limit;
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+
   try {
-    const products = await Product.find();
-    console.log(products);
+    let products;
+    const allProducts = await Product.find();
+    if (startIndex < allProducts.length) {
+      products = await Product.find().limit(limit).skip(startIndex);
+    } else {
+      products = await Product.find();
+    }
+    const paginationInfo = {};
+    paginationInfo.totalPage = Math.ceil(allProducts.length / limit);
     if (products) {
+      if (endIndex < allProducts.length) {
+        paginationInfo.nextPage = {
+          page: page + 1,
+        };
+      }
+      if (startIndex !== 0) {
+        paginationInfo.prevPage = {
+          page: page - 1,
+        };
+      }
+      console.log(paginationInfo);
       res.status(200).json({
         msg: "Products",
         products,
+        paginationInfo,
       });
     }
   } catch (err) {
