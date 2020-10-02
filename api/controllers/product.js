@@ -18,15 +18,17 @@ exports.getAllProducts = async (req, res, next) => {
     const paginationInfo = {};
     paginationInfo.totalPage = Math.ceil(allProducts.length / limit);
     if (products) {
-      if (endIndex < allProducts.length) {
-        paginationInfo.nextPage = {
-          page: page + 1,
-        };
-      }
-      if (startIndex !== 0) {
-        paginationInfo.prevPage = {
-          page: page - 1,
-        };
+      if (products.length !== allProducts.length) {
+        if (endIndex < allProducts.length) {
+          paginationInfo.nextPage = {
+            page: page + 1,
+          };
+        }
+        if (startIndex !== 0) {
+          paginationInfo.prevPage = {
+            page: page - 1,
+          };
+        }
       }
       console.log(paginationInfo);
       res.status(200).json({
