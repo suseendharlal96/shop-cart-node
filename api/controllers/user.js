@@ -175,7 +175,9 @@ exports.pay = async (req, res, next) => {
   if (!req.userId) {
     return res.status(400).json({ error: "Unauthorized" });
   }
-  if (!req.body.token) {
+  console.log(req.body);
+  if (req.body.token) {
+    console.log(1);
     const idempotencyKey = uuidv4();
     const product = req.body.product;
     const token = req.body.token;
@@ -218,19 +220,21 @@ exports.pay = async (req, res, next) => {
   } else {
     const user = await User.findById(req.userId);
     if (user) {
-      const cIndex = user.cart.findIndex((c) => c._id === product._id);
+      const cIndex = user.cart.findIndex((c) => c._id === req.body.product._id);
       if (cIndex !== -1) {
         user.cart.splice(cIndex, 1);
       }
       user.order.push({
-        product: product,
-        receiptUrl: result.receipt_url,
-        paymentDetails: result.payment_method_details,
+        product: req.body.product,
         date: new Date().toISOString(),
       });
     }
     const userData = await user.save();
-    return res.status(200).json({ result: result });
+    return res
+      .status(200)
+      .json({
+        result: { ...req.body.product, date: new Date().toISOString() },
+      });
   }
 };
 
