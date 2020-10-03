@@ -175,44 +175,62 @@ exports.pay = async (req, res, next) => {
   if (!req.userId) {
     return res.status(400).json({ error: "Unauthorized" });
   }
-  const idempotencyKey = uuidv4();
-  const product = req.body.product;
-  const token = req.body.token;
-  console.log(token);
-  console.log(product);
-  console.log(idempotencyKey);
-  const customer = await stripe.customers.create({
-    email: token.email,
-    source: token.id,
-  });
-  if (customer) {
-    const result = await stripe.charges.create(
-      {
-        amount: product.price * product.qty * 100,
-        currency: "inr",
-        customer: customer.id,
-        description: product.name,
-        receipt_email: "lssuseendharlal@gmail.com",
-      },
-      { idempotencyKey }
-    );
-    if (result) {
-      const user = await User.findById(req.userId);
-      if (user) {
-        const cIndex = user.cart.findIndex((c) => c._id === product._id);
-        if (cIndex !== -1) {
-          user.cart.splice(cIndex, 1);
+  if (!req.body.token) {
+    const idempotencyKey = uuidv4();
+    const product = req.body.product;
+    const token = req.body.token;
+    console.log(token);
+    console.log(product);
+    console.log(idempotencyKey);
+    const customer = await stripe.customers.create({
+      email: token.email,
+      source: token.id,
+    });
+    if (customer) {
+      const result = await stripe.charges.create(
+        {
+          amount: product.price * product.qty * 100,
+          currency: "inr",
+          customer: customer.id,
+          description: product.name,
+          receipt_email: "lssuseendharlal@gmail.com",
+        },
+        { idempotencyKey }
+      );
+      if (result) {
+        const user = await User.findById(req.userId);
+        if (user) {
+          const cIndex = user.cart.findIndex((c) => c._id === product._id);
+          if (cIndex !== -1) {
+            user.cart.splice(cIndex, 1);
+          }
+          user.order.push({
+            product: product,
+            receiptUrl: result.receipt_url,
+            paymentDetails: result.payment_method_details,
+            date: new Date().toISOString(),
+          });
         }
-        user.order.push({
-          product: product,
-          receiptUrl: result.receipt_url,
-          paymentDetails: result.payment_method_details,
-          date: new Date().toISOString(),
-        });
+        const userData = await user.save();
+        return res.status(200).json({ result: result });
       }
-      const userData = await user.save();
-      return res.status(200).json({ result: result });
     }
+  } else {
+    const user = await User.findById(req.userId);
+    if (user) {
+      const cIndex = user.cart.findIndex((c) => c._id === product._id);
+      if (cIndex !== -1) {
+        user.cart.splice(cIndex, 1);
+      }
+      user.order.push({
+        product: product,
+        receiptUrl: result.receipt_url,
+        paymentDetails: result.payment_method_details,
+        date: new Date().toISOString(),
+      });
+    }
+    const userData = await user.save();
+    return res.status(200).json({ result: result });
   }
 };
 
