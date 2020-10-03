@@ -123,12 +123,12 @@ exports.postCart = async (req, res, next) => {
     if (user.cart && user.cart.length) {
       const prod = user.cart.find((prd) => prd._id === product._id);
       if (prod) {
-        prod.qty += 1;
+        prod.quantity += 1;
       } else {
-        user.cart.push({ ...product, qty: 1 });
+        user.cart.push({ ...product, quantity: 1 });
       }
     } else {
-      user.cart.push({ ...product, qty: 1 });
+      user.cart.push({ ...product, quantity: 1 });
     }
     console.log(user.cart);
     const result = await User.update(
@@ -189,7 +189,7 @@ exports.pay = async (req, res, next) => {
     if (customer) {
       const result = await stripe.charges.create(
         {
-          amount: product.price * product.qty * 100,
+          amount: product.price * product.quantity * 100,
           currency: "inr",
           customer: customer.id,
           description: product.name,
