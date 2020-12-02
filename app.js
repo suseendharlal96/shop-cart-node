@@ -23,6 +23,7 @@ const multer = require("multer");
 const productRoute = require("./api/routes/products");
 const orderRoute = require("./api/routes/orders");
 const userRoute = require("./api/routes/user");
+const movieRoute = require("./api/routes/movies");
 
 app.use(cors());
 app.use(morgan("dev"));
@@ -141,6 +142,7 @@ app.use((req, res, next) => {
 app.use("/products", productRoute);
 app.use("/orders", orderRoute);
 app.use("/user", userRoute);
+app.use("/movies", movieRoute);
 
 app.use((req, res, next) => {
   const error = new Error("Route not found");
